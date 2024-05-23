@@ -1,0 +1,8 @@
+#!/usr/bin/env -S python -u
+from argparse import ArgumentParser
+from pyED.run import diag
+
+parser = ArgumentParser()
+parser.add_argument('-s', '--save')
+args = parser.parse_args()
+diag(args.save)    

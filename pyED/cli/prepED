@@ -1,0 +1,25 @@
+#!/usr/bin/env -S python -u
+from argparse import ArgumentParser
+from pyED.run import make_inputs
+from numpy import linspace
+
+parser = ArgumentParser()
+parsed, unknown = parser.parse_known_args()
+for arg in unknown:
+    if arg.startswith(("-", "--")):
+        parser.add_argument(arg.split('=')[0], nargs = '+', type = str)
+args = parser.parse_args()
+
+grid = args.__dict__
+for key, old_values in grid.items():
+    new_values = list()
+    for old_value in old_values:
+        if ',' in old_value:
+            start, stop, npts = old_value.split(',')
+            for grid_pt in linspace(float(start), float(stop), int(npts)).astype(str):
+                new_values.append(grid_pt)
+        else:
+            new_values.append(old_value)
+    grid[key] = new_values
+grid = {'@'+key: value for key, value in grid.items()}
+make_inputs(grid)

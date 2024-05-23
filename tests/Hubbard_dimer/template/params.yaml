@@ -1,0 +1,21 @@
+# Run
+solver: full
+
+# Lattice params
+lattice_type: Chain
+LX: 2
+LY: 1
+N_sub: 1
+
+# Model params
+model_type: nnHubbard
+t: 1
+U: @U
+
+# Conserved quantities
+N: 2
+Sz: null
+
+# Boundary conditions
+open_X: True
+open_Y: True

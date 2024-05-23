@@ -1,0 +1,22 @@
+# Run
+solver: Lanczos
+num_eigs: null
+
+# Lattice params
+lattice_type: Chain
+LX: @L
+LY: 1
+N_sub: 1
+
+# Model params
+model_type: nnHubbard
+t: 1
+U: @U
+
+# Conserved quantities
+N: @N
+Sz: @Sz
+
+# Boundary conditions
+open_X: True
+open_Y: True
