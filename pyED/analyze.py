@@ -24,7 +24,7 @@ class SpectralProps(Basis):
             return self.g
         return np.sum( np.exp( - beta * (self.E.real - self.E0) ) )
 
-    def OperatorAverage(self, op: OperatorString, beta: float):
+    def OperatorAverage(self, op: OperatorString, beta: float, dtol = 1e-4):
         avg = 0
         if np.isinf(beta):
             # Get indices of degenerate states
