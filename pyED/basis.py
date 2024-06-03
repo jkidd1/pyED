@@ -95,6 +95,7 @@ class Basis:
         
     def __post_init__(self):
         self.get_sites()
+        self.Lin = list()
         self.generate_Lin_table()
     
     def get_sites(self):
@@ -111,42 +112,63 @@ class Basis:
     def generate_Lin_table(self):
         '''
         Write a list of basis states, ordered by their binary representation.
+        Depends on whether conserved quantities (N and/or Sz) are considered.
         '''
-        self.Lin = list()
+        L = params.LX * params.LY * params.N_sub
 
-        # If N is conserved
-        if params.N != None:
-            # If Sz is conserved
-            if params.Sz != None:
-                if (params.N + params.Sz) % 2 != 0 or (params.N - params.Sz) % 2 != 0:
-                    raise ValueError('Number of fermions in each spin sector must be an integer!')
-                self.N_up   = (params.N + params.Sz) // 2
-                self.N_down = (params.N - params.Sz) // 2
-                self.Lin = self.get_binary_strings(self.N_up, self.N_down)
-            # If Sz is not conserved
-            else: 
-                for Sz in range(-params.N, params.N + 1, 2):
-                    N_up   = (params.N + Sz) // 2
-                    N_down = (params.N - Sz) // 2
-                    self.Lin += self.get_binary_strings(N_up, N_down)
-    
-        # If N is not conserved
-        # TO-DO: add the case where Sz is still conserved
-        else:
-            L = params.LX * params.LY * params.N_sub
-            # N = 0, ..., 2L
-            for N in range(2*L + 1):
-                for Sz in range(-N, N + 1, 2):
-                    N_up   = (N + Sz) // 2
-                    N_down = (N - Sz) // 2
-                    self.Lin += self.get_binary_strings(N_up, N_down)
+        cons_N  = (params.N  != None)
+        cons_Sz = (params.Sz != None)
+        
+        # There are 4 cases total.
 
+        # 1. Both N and Sz conserved
+        if cons_N and cons_Sz:
+            self.update_Lin_table(params.N, params.Sz)
+
+        # 2. N conserved, Sz not conserved
+        if cons_N and (not cons_Sz):
+            Sz_min  = abs(params.N - L) - L
+            Sz_max  = L - abs(params.N - L)
+            Sz_vals = range(Sz_min, Sz_max + 1, 2)
+            for Sz in Sz_vals:
+                self.update_Lin_table(params.N, Sz)
+
+        # 3. N not conserved, Sz conserved
+        if (not cons_N) and cons_Sz:
+            N_min  = abs(params.Sz)
+            N_max  = 2*L - abs(params.Sz)
+            N_vals = range(N_min, N_max + 1, 2)
+            for N in N_vals:
+                self.update_Lin_table(N, params.Sz)
+
+        # 4. Neither N nor Sz conserved
+        if (not cons_N) and (not cons_Sz):
+            N_vals = range(2*L + 1)
+            for N in N_vals:
+                Sz_min  = abs(N - L) - L
+                Sz_max  = L - abs(N - L)
+                Sz_vals = range(Sz_min, Sz_max + 1, 2)
+                for Sz in Sz_vals:
+                    self.update_Lin_table(N, Sz)
+
+        # Optionally write basis file
         if params.verbose == True:
             with open('basis', 'w') as f:
                 f.write('\n'.join(self.Lin))
         
+        # Hilbert space dimension
         self.dim = len(self.Lin)
     
+
+    def update_Lin_table(self, N, Sz):
+        if (N + Sz) % 2 != 0 or (N - Sz) % 2 != 0:
+            err_msg = 'Number of fermions in each spin sector must be an integer!'
+            raise ValueError(err_msg)
+        N_up   = (N + Sz) // 2
+        N_down = (N - Sz) // 2
+        self.Lin += self.get_binary_strings(N_up, N_down)
+
+
     def get_binary_strings(self, N_up, N_down):
         '''
         Mathematical function to generate all possible spin configurations on the lattice.

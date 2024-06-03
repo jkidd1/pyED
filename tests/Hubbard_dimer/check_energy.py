@@ -20,7 +20,7 @@ for i, (cfg, folder) in enumerate(jobs):
     with cd(f'calc/{folder}'):
         E_vals = np.sort(diag().E)
     for j, E in enumerate(E_vals):
-        error[i, j] = E - ref[j]
+        error[i, j] = E.real - ref[j]
 
 with open('max_error', 'w') as f:
     f.write(f'{np.max(error)}')

@@ -124,3 +124,4 @@ class Square:
             nn.append(WannierState(w_j.cellY + dR, w_j.cellX, 0))
             nn.append(WannierState(w_j.cellY, w_j.cellX + dR, 0))
         return nn
+

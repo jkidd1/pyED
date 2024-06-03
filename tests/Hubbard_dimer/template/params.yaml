@@ -1,5 +1,6 @@
 # Run
 solver: full
+verbose: null
 
 # Lattice params
 lattice_type: Chain
