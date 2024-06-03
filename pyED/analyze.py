@@ -5,7 +5,7 @@ import pickle
 
 class SpectralProps(Basis):
 
-    def __init__(self, solved_model = None, save_file = None):
+    def __init__(self, solved_model = None, save_file = None, dtol = 1e-4):
         super().__post_init__()
         if solved_model:
             self.E, self.Psi = solved_model.E, solved_model.psi
@@ -15,10 +15,32 @@ class SpectralProps(Basis):
         else:
             raise FileNotFoundError('Model could not be found!')
         # Ground state energy
-        self.E0 = sorted(self.E)[0].real
+        self.E0  = sorted(self.E)[0].real
+        # Ground state degeneracy 
+        self.g = np.sum(np.abs(self.E.real - self.E0) < dtol)
 
-    def Z_tilde(self, beta: float):
+    def Z0(self, beta: float):
+        if np.isinf(beta):
+            return self.g
         return np.sum( np.exp( - beta * (self.E.real - self.E0) ) )
+
+    def OperatorAverage(self, op: OperatorString, beta: float):
+        avg = 0
+        if np.isinf(beta):
+            # Get indices of degenerate states
+            k_vals = [k for k, Ek in enumerate(self.E.real) if np.abs(Ek - self.E0) < dtol]
+            # Sum over degenerate levels
+            for k in k_vals:
+                # Sum over Fock basis
+                for n, alpha_n in enumerate(self.Psi[:, k]):
+                    phase_fac, f_n = self.get_fermion_matrix_element(n, op)
+                    if phase_fac != 0:
+                        alpha_f = self.Psi[:, k][f_n]
+                        avg += np.conj(alpha_f) * alpha_n * phase_fac
+            # Divide by ground state degeneracy
+            avg /= self.g
+            return avg
+
 
 
 class GroundStateProps(Basis):
