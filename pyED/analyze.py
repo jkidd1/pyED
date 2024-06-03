@@ -3,6 +3,24 @@ import numpy as np
 from .basis import Basis, OperatorString
 import pickle
 
+class SpectralProps(Basis):
+
+    def __init__(self, solved_model = None, save_file = None):
+        super().__post_init__()
+        if solved_model:
+            self.E, self.Psi = solved_model.E, solved_model.psi
+        elif save_file:
+            with open(save_file, 'rb') as f:
+                self.E, self.Psi = pickle.load(f)
+        else:
+            raise FileNotFoundError('Model could not be found!')
+        # Ground state energy
+        self.E0 = sorted(self.E)[0].real
+
+    def Z_tilde(self, beta: float):
+        return np.sum( np.exp( - beta * (self.E.real - self.E0) ) )
+
+
 class GroundStateProps(Basis):
 
     def __init__(self, solved_model = None, save_file = None):
