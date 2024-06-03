@@ -28,6 +28,12 @@ class ModelBase(Lattice):
                 H_data.append(coupling * phase_fac)
         self.H += coo_matrix((H_data, (row_idx, col_idx)), shape = (self.dim, self.dim), dtype = complex).tocsr()
 
+    def add_chemical_potential(self, mu: float):
+        for w_i in self.sites:
+            for sigma in ['up', 'down']:
+                n = OperatorString([+1, -1], [w_i, w_i], [sigma, sigma])
+                self.add_coupling(mu, n)
+
     def add_constant(self, constant: float):
         row_idx = list(range(self.dim))
         col_idx = list(range(self.dim))
@@ -89,9 +95,6 @@ class nnHubbardPH(nnHubbard):
     def add_PH(self):
         print('Adding particle-hole correction...')
         mu = -params.U / 2
-        for w_i in self.sites:
-            for sigma in ['up', 'down']:
-                n = OperatorString([+1, -1], [w_i, w_i], [sigma, sigma])
-                self.add_coupling(mu, n)
+        self.add_chemical_potential(mu)
         L = params.LX * params.LY * params.N_sub
         self.add_constant(params.U * L / 4)
