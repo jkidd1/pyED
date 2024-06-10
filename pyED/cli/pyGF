@@ -1,0 +1,21 @@
+#!/usr/bin/env -S python -u
+from argparse import ArgumentParser
+from pyED.run import calc_2pt 
+import numpy as np
+
+parser = ArgumentParser()
+options = {'-b': '--beta-vals', '-o': '--orbital-pairs', '-s': '--spin-pairs', '-d': '--delta-pairs'}
+for key, val in options.items():
+	parser.add_argument(key, val, nargs = '+', type = str, default = None)
+full_dict = parser.parse_args().__dict__
+kwargs = {key: val for key, val in full_dict.items() if val != None}
+parse_list = lambda dtype, string: [dtype(string.split(',')[0]), dtype(string.split(',')[1])]
+for key in ['orbital_pairs', 'delta_pairs']:
+	if full_dict[key] != None:
+		kwargs[key] = [parse_list(int, string) for string in kwargs.copy()[key]]
+if full_dict['spin_pairs']:
+	kwargs['spin_pairs'] = [parse_list(str, string) for string in kwargs.copy()['spin_pairs']]
+if full_dict['beta_vals']:
+	kwargs['beta_vals'] = [np.inf if string == 'inf' else float(string) for string in kwargs.copy()['beta_vals']]
+
+calc_2pt(**kwargs)

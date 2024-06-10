@@ -73,7 +73,7 @@ def diag(result_path = None):
     
     return m
 
-def calc_2pt(fermion_pairs = [[+1, -1]], orbital_pairs = [[0, 0]], spin_pairs = ['up', 'up'], result_path = 'result.p', beta = np.inf, fname = '2pt_function'):
+def calc_2pt(delta_pairs = [[+1, -1]], orbital_pairs = [[0, 0]], spin_pairs = ['up', 'up'], result_path = 'result.p', beta_vals = [np.inf], fname = '2pt_function'):
     '''
     Compute ground state two-point function(s) and save to file.
     '''
@@ -84,11 +84,12 @@ def calc_2pt(fermion_pairs = [[+1, -1]], orbital_pairs = [[0, 0]], spin_pairs = 
     Props = SpectralProps(save_file = 'result.p')
     with open(fname, 'w') as f:
         f.write('d1,d2,s1,s2,i,j,Re G, Im G')
-    for d1, d2 in fermion_pairs:
-        for s1, s2 in spin_pairs:
-            for i, j in orbital_pairs:
-                w_i, w_j = sites[i], sites[j]
-                op = OperatorString([d1, d2], [w_i, w_j], [s1, s2])
-                G = Props.OperatorAverage(op, beta)
-                with open(fname, 'a') as f:
-                    f.write(f'\n{d1},{d2},{s1},{s2},{i},{j},{G.real},{G.imag}')
+    for beta in beta_vals:
+        for d1, d2 in delta_pairs:
+            for s1, s2 in spin_pairs:
+                for i, j in orbital_pairs:
+                    w_i, w_j = sites[i], sites[j]
+                    op = OperatorString([d1, d2], [w_i, w_j], [s1, s2])
+                    G = Props.OperatorAverage(op, beta)
+                    with open(fname, 'a') as f:
+                        f.write(f'\n{beta},{d1},{d2},{s1},{s2},{i},{j},{G.real},{G.imag}')
