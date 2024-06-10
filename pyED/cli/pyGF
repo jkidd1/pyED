@@ -17,5 +17,5 @@ if full_dict['spin_pairs']:
 	kwargs['spin_pairs'] = [parse_list(str, string) for string in kwargs.copy()['spin_pairs']]
 if full_dict['beta_vals']:
 	kwargs['beta_vals'] = [np.inf if string == 'inf' else float(string) for string in kwargs.copy()['beta_vals']]
-
+#print(kwargs)
 calc_2pt(**kwargs)
