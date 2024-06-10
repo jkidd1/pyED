@@ -18,6 +18,10 @@ class SpectralProps(Basis):
         self.E0  = sorted(self.E)[0].real
         # Ground state degeneracy 
         self.g = np.sum(np.abs(self.E.real - self.E0) < dtol)
+        self.has_excited_states = False if np.all(np.abs(self.E.real - self.E0) < dtol) else True
+        if not self.has_excited_states:
+            with open('WARNINGS', 'a') as f:
+                f.write('1: No excited states found\n')
 
     def Z0(self, beta: float):
         if np.isinf(beta):
